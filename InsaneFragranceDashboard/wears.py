@@ -14,7 +14,10 @@ def read_wears():
     Returns:
         pd.DataFrame: A DataFrame containing fragrance wear data with a new column 'sheet_name'.
     """
-    excel_file='Copy of Silly_Fragrance_excel.xlsx'
+    #excel_file='Copy of Silly_Fragrance_excel.xlsx'
+    excel_file = os.path.join(os.path.dirname(__file__), 'Copy of Silly_Fragrance_excel.xlsx')
+
+
     # Read all sheets into a dictionary
     all_sheets = pd.read_excel(excel_file, sheet_name=None)
 

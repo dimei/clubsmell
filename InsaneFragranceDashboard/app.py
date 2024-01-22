@@ -3,16 +3,17 @@ import plotly.express as px
 import streamlit as st
 import numpy as np
 import datetime
+import os
 
-#from streamlit_dynamic_filters import DynamicFilters
-from mod_dynamic_filters import DynamicFilters
+file_path = os.path.join(os.path.dirname(__file__), 'Copy of Silly_Fragrance_excel.xlsx')
+
 from wears import read_wears, sum_wears, plot_wears,all_wears_plot,plot_bottles
 
 # streamlit run app.py
 # tutorial https://medium.com/@vishaltyagi.dev098/excel-sheet-interactive-dashboard-python-streamlit-114f7c240fc8
 
 df=pd.read_excel(
-    io='Copy of Silly_Fragrance_excel.xlsx',
+    io=file_path,
     engine='openpyxl',
     sheet_name='Insane Persons Sheet'
 )
