@@ -1,0 +1,55 @@
+# things tried before
+
+# attempt at proper dependencies of side bar selections, works well but I want to implement this with selectbox and not multiselect
+
+dynamic_filters = DynamicFilters(df, filters=['Fragrance', 'House', 'Perfumer','Type'])
+with st.sidebar:
+    dynamic_filters.display_filters()
+
+#dynamic_filters.display_df()
+df_selection=dynamic_filters.filter_df()
+if df_selection.shape[0]>1:
+    fragrance=df_selection["Fragrance"][0][0:]
+else:
+    df_selection=df_selection.iloc[-1,:]
+    fragrance=df_selection["Fragrance"][0][0:]
+    
+    
+# from chatgpt with selectbox 3 tiers, but doesn't work
+
+
+
+# # First set of filters
+# st.sidebar.header("Filter by House:")
+# selected_house = st.sidebar.selectbox('Select House:', options=df['House'].unique())
+# filtered_fragrances_house = df[df['House'] == selected_house]['Fragrance'].unique()
+# selected_fragrance_house = st.sidebar.selectbox('Select Fragrance:', options=filtered_fragrances_house)
+
+# st.sidebar.markdown("---")
+
+# # Second set of filters
+# st.sidebar.header("Filter by Perfumer:")
+# selected_perfumer = st.sidebar.selectbox('Select Perfumer:', options=np.sort(df['Perfumer'].dropna().astype(str).unique()) )
+# filtered_fragrances_perfumer = df[df['Perfumer'] == selected_perfumer]['Fragrance'].unique()
+# selected_fragrance_perfumer = st.sidebar.selectbox('Select Fragrance:', options=filtered_fragrances_perfumer)
+
+# st.sidebar.markdown("---")
+
+# # Third set of filters
+# st.sidebar.header("Filter by Smell Family:")
+# selected_category = st.sidebar.selectbox('Select Family:', options=np.sort( df['Type'].dropna().astype(str).unique()) )
+# filtered_fragrances_category = df[df['Type'] == selected_category]['Fragrance'].unique()
+# selected_fragrance_category = st.sidebar.selectbox('Select Fragrance:', options=filtered_fragrances_category)
+
+
+
+# # Use the selected fragrance based on the active filter
+# fragrance = (
+#     selected_fragrance_house
+#     if selected_house
+#     else selected_fragrance_perfumer
+#     if selected_perfumer
+#     else selected_fragrance_category
+#     if selected_category
+#     else selected_fragrance_all
+# )
