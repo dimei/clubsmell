@@ -209,7 +209,7 @@ class WearsFunctions:
         # max is 300 mL, min is 30 mL roughly. update later.
         #norm_mL_start= 1 / (6 * (275 - 30) / (bottle_size - 30) + 1)
 
-        norm_mL_start = math.sqrt( .1/5* ((bottle_size - 29) / (275 - 29)))
+        norm_mL_start = math.sqrt( .1/5* (bottle_size) / (275))
         # Set layout properties
         fig.update_layout(
             showlegend=False,
