@@ -7,7 +7,7 @@ import os
 
 file_path = os.path.join(os.path.dirname(__file__), 'Copy of Silly_Fragrance_excel.xlsx')
 
-from wears import read_wears, sum_wears, plot_wears,all_wears_plot,plot_bottles
+from wears import WearsFunctions
 
 # streamlit run app.py
 # tutorial https://medium.com/@vishaltyagi.dev098/excel-sheet-interactive-dashboard-python-streamlit-114f7c240fc8
@@ -22,7 +22,7 @@ df=df.dropna(how='all')
 df = df.dropna(subset=[df.columns[0], df.columns[1]], how='any')
 df["Retail $/mL"]=df["$"]/df["mL"]
 
-wears_df=read_wears()
+wears_df=WearsFunctions.read_wears()
 
 # PANDAS DATABASE CREATION
 st.set_page_config(
@@ -56,27 +56,35 @@ st.set_page_config(
 #  "Fragrance== @fragrance"
 # )
 
+df_sort_score = df.dropna(subset=["Score out of 100"]).sort_values(by='Score out of 100',ascending=False)
+
+df['First_Word_Type'] = df['Type'].str.split().str[0]
+unique_first_words = df['First_Word_Type'].unique()
 
 # Sidebar filter selection
-filter_choice = st.sidebar.selectbox('Filter by House, Perfumer, or See All Fragrances:', options=['House', 'Perfumer', 'All Fragrances'])
+filter_choice = st.sidebar.selectbox('Filter by House, Perfumer, or See All Fragrances:', options=['House', 'Perfumer', 'Type','All Fragrances'])
 
 # Filter based on the first choice
 if filter_choice == 'House':
-    selected_house = st.sidebar.selectbox('Select House:', options=df['House'].unique())
+    selected_house = st.sidebar.selectbox('Select House:', options=df['House'].dropna().unique())
     filtered_fragrances_house = df[df['House'] == selected_house]['Fragrance'].unique()
     fragrance = st.sidebar.selectbox('Select Fragrance:', options=filtered_fragrances_house)
     
 
     
 elif filter_choice == 'Perfumer':
-    selected_house = st.sidebar.selectbox('Select Perfumer:', options=df['Perfumer'].unique())
+    selected_house = st.sidebar.selectbox('Select Perfumer:', options=df['Perfumer'].dropna().unique())
     filtered_fragrances_house = df[df['Perfumer'] == selected_house]['Fragrance'].unique()
     fragrance = st.sidebar.selectbox('Select Fragrance:', options=filtered_fragrances_house)
-    
 
+
+elif filter_choice == 'Type':
+    selected_house = st.sidebar.selectbox('Select Perfumer:', options=unique_first_words)
+    filtered_fragrances_house = df[df['First_Word_Type'] == selected_house]['Fragrance'].unique()
+    fragrance = st.sidebar.selectbox('Select Fragrance:', options=filtered_fragrances_house)
     
 elif filter_choice == 'All Fragrances':
-    fragrance = st.sidebar.selectbox('Select Fragrance:', options=df["Fragrance"].unique())
+    fragrance = st.sidebar.selectbox('Select Fragrance, ordered best to worst:', options=df_sort_score["Fragrance"].unique())
 
 
     
@@ -85,8 +93,22 @@ df_selection=df.query(
 )
 
 st.header(fragrance)
-st.subheader("House: "+ df_selection["House"].iloc[0])
-st.subheader("Perfumer: "+df_selection["Perfumer"].iloc[0])
+
+c1,c2,c3=st.columns(3)
+with c1:
+    st.subheader("House")
+    st.subheader(df_selection["House"].iloc[0])
+
+
+with c2:
+    st.subheader("Perfumer")
+    st.subheader(df_selection["Perfumer"].iloc[0])
+
+with c3: 
+    st.subheader("Type")
+    st.subheader(df_selection["Type"].iloc[0])
+
+
 
 # review text
 for note in df_selection["My notes"]:
@@ -137,7 +159,7 @@ with c1:
 
 
     
-    
+st.markdown("---")
 # WEARS PER YEAR and predicted end year
 
 total_wear_frags=len(wears_df["Fragrance"].unique())
@@ -146,22 +168,24 @@ if wears_df["Fragrance"].isin([fragrance]).any():
     st.subheader("Wears Tracker")
 
 
-    wears, ranking, ml_left, plot_df,starting_ml=sum_wears(wears_df,fragrance)
-    plot, slope=plot_wears(plot_df, starting_ml)
+    wears, ranking, ml_left, plot_df,ml_start=WearsFunctions.sum_wears(wears_df,fragrance)
+    plot, slope=WearsFunctions.plot_wears(plot_df, ml_start)
     
-    st.plotly_chart(all_wears_plot(fragrance,wears_df))
+    st.plotly_chart(WearsFunctions.all_wears_plot(fragrance,wears_df))
 
     
     st.plotly_chart(plot)
 
-
+    bottle_size=plot_df["mL"].values[0]
     #show total wears and all time ranking and year to run out
     w1,w2,w3=st.columns(3)
     with w1:
         st.subheader("Starting mL")
-        st.subheader(f"{starting_ml}")
-        st.plotly_chart(plot_bottles(starting_ml,starting_ml) )
+        st.subheader(f"{ml_start}")
+        st.plotly_chart(WearsFunctions.plot_bottles(1,bottle_size) )
 
+        for i in range(0,plot_df["Backups"].values[0] ):
+            st.plotly_chart(WearsFunctions.plot_bottles(1,bottle_size) )
     #with w2:
     #    st.subheader("Total Wears")
     #    st.subheader(f"{wears}")
@@ -169,23 +193,39 @@ if wears_df["Fragrance"].isin([fragrance]).any():
     with w2:
         st.subheader("Remaining mL")
         st.subheader(f"{round(ml_left)}")
-        st.plotly_chart(plot_bottles(ml_left,starting_ml) )
+        
+        
+        if plot_df["Backups"].values[0]>0:
+            pct_list=WearsFunctions.list_mult_bottles(ml_left,ml_start,plot_df)
+
+            for i in pct_list:
+                st.plotly_chart(WearsFunctions.plot_bottles(i,bottle_size) )
+        else:
+            st.plotly_chart(WearsFunctions.plot_bottles(ml_left/ml_start,bottle_size) )
 
 
     year_empty=round( datetime.datetime.now().year +(ml_left *3 /slope ) )
     with w3:
         st.subheader("Year to Run out")
         st.subheader(f"{year_empty}")
-
-
+        if pd.isna(df_selection["Retail $/mL"]).any()==False:
+            st.subheader("💸💸💸")
+            moolah = df_selection["Retail $/mL"].values[0] / 3
+            formatted_moolah = "${:.2f}".format(moolah)
+            #styled_text = f'<p style="color: #d4b2f1; font-size: xx-large;">{formatted_moolah}/Wear</p>'
+            #st.markdown(styled_text, unsafe_allow_html=True)
+            st.subheader(f"{formatted_moolah} per Wear")
 
 
 else:
     st.subheader("Wears not tracked yet.")
-    
-    
-    
-    
+    if pd.isna(df_selection["Retail $/mL"]).any()==False:
+        st.subheader("💸💸💸")
+        moolah = df_selection["Retail $/mL"].values[0] / 3
+        formatted_moolah = "${:.2f}".format(moolah)
+        #styled_text = f'<p style="color: #d4b2f1; font-size: xx-large;">{formatted_moolah}/Wear</p>'
+        #st.markdown(styled_text, unsafe_allow_html=True)
+        st.subheader(f"{formatted_moolah} per Wear")
 
     
 st.write('<div style="{}">Data from Anonymous Man, to whom I am grateful :)<br> By CLUBSMELL</div>'.format(small_text_style), unsafe_allow_html=True)
