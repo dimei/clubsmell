@@ -5,7 +5,7 @@ import numpy as np
 import datetime
 import os
 
-file_path = os.path.join(os.path.dirname(__file__), 'Copy of Silly_Fragrance_excel.xlsx')
+file_path = os.path.join(os.path.dirname(__file__), 'Silly_Fragrance_excel.xlsx')
 
 from wears import WearsFunctions
 
@@ -59,10 +59,10 @@ st.set_page_config(
 df_sort_score = df.dropna(subset=["Score out of 100"]).sort_values(by='Score out of 100',ascending=False)
 
 df['First_Word_Type'] = df['Type'].str.split().str[0]
-unique_first_words = df['First_Word_Type'].unique()
+unique_first_words = df['First_Word_Type'].dropna().unique()
 
 # Sidebar filter selection
-filter_choice = st.sidebar.selectbox('Filter by House, Perfumer, or See All Fragrances:', options=['House', 'Perfumer', 'Type','All Fragrances'])
+filter_choice = st.sidebar.selectbox('Filter by House, Perfumer, Type, or See All:', options=['House', 'Perfumer', 'Type','All Fragrances'])
 
 # Filter based on the first choice
 if filter_choice == 'House':
@@ -79,7 +79,7 @@ elif filter_choice == 'Perfumer':
 
 
 elif filter_choice == 'Type':
-    selected_house = st.sidebar.selectbox('Select Perfumer:', options=unique_first_words)
+    selected_house = st.sidebar.selectbox('Select Type:', options=unique_first_words)
     filtered_fragrances_house = df[df['First_Word_Type'] == selected_house]['Fragrance'].unique()
     fragrance = st.sidebar.selectbox('Select Fragrance:', options=filtered_fragrances_house)
     
@@ -233,4 +233,4 @@ st.markdown('<a href="http://www.clubsmell.com" style="color: #602ec9;">CLUBSMEL
 
 st.markdown('---')
 
-st.write('<div style="{}"> Details and Assumptions<br> 1. Wears visualized for 2021-2022 were tracked together since July 2021. For the line graph, I halved the total for 2021-2022 and assigned the rounded down value to 2021, and rounded up for 2022.<br>2. I assumed 12 sprays per 1 mL, 4 sprays for 1 wear, so that is 3 wears per 1 mL! This is a gross approximation and changes based on atomizer size and type. </div>'.format(small_text_style), unsafe_allow_html=True)
+st.write('<div style="{}"> Details and Assumptions<br> 1. Wears visualized for 2021-2022 were tracked together since July 2021. For the line graph, I halved the total for 2021-2022 and assigned the rounded down value to 2021, and rounded up for 2022.<br>2. I assumed 12 sprays per 1 mL, 4 sprays for 1 wear, so that is 3 wears per 1 mL! This is a gross approximation and changes based on atomizer size and type.<br>3. Last updated 3 February 2024. </div>'.format(small_text_style), unsafe_allow_html=True)

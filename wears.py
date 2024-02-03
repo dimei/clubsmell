@@ -154,8 +154,13 @@ class WearsFunctions:
 
         variable2=sorted_df.index.max()
         fig.update_layout(
-            title=f'All Time Wears Per Fragrance, Rank: {highlighted_bar_index+1} out of {variable2+1}',
-        xaxis_title=None)
+            title=f'All Time Wears Per Fragrance, Rank: {highlighted_bar_index + 1} out of {len(sorted_df)}',
+            xaxis=dict(
+                tickangle=-45,  # Slant the labels
+                title=None,
+                tickmode='linear'  # This ensures that all labels are displayed; adjust if necessary
+            )
+        )
 
         return fig
 
